@@ -37,15 +37,17 @@ namespace Moonvalk.Audio
             }
 
             var child = GetChild(0);
-            if (child is AudioStreamPlayer audioStreamPlayer)
+            if (!(child is AudioStreamPlayer audioStreamPlayer))
             {
-                _audioStreamPlayers.Add(audioStreamPlayer);
-                for (var index = 0; index < Count; index++)
-                {
-                    var duplicate = audioStreamPlayer.Duplicate() as AudioStreamPlayer;
-                    AddChild(duplicate);
-                    _audioStreamPlayers.Add(duplicate);
-                }
+                return;
+            }
+
+            _audioStreamPlayers.Add(audioStreamPlayer);
+            for (var index = 0; index < Count; index++)
+            {
+                var duplicate = audioStreamPlayer.Duplicate() as AudioStreamPlayer;
+                AddChild(duplicate);
+                _audioStreamPlayers.Add(duplicate);
             }
         }
 
@@ -69,12 +71,13 @@ namespace Moonvalk.Audio
         /// </summary>
         public void PlaySound()
         {
-            if (!_audioStreamPlayers[_nextIndex].Playing)
+            if (_audioStreamPlayers[_nextIndex].Playing)
             {
-                _audioStreamPlayers[_nextIndex++]
-                    .Play();
-                _nextIndex %= _audioStreamPlayers.Count;
+                return;
             }
+
+            _audioStreamPlayers[_nextIndex++].Play();
+            _nextIndex %= _audioStreamPlayers.Count;
         }
     }
 }

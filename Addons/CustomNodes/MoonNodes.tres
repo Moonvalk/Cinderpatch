@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=6 format=2]
+
+[ext_resource path="res://Addons/CustomNodes/Nodes/node_GameRoot.tres" type="Resource" id=1]
+[ext_resource path="res://Addons/CustomNodes/Nodes/node_SceneLoader.tres" type="Resource" id=2]
+[ext_resource path="res://Addons/CustomNodes/Data/CustomNodesList.cs" type="Script" id=3]
+[ext_resource path="res://Moonvalk/Components/Audio/SoundQueue/node_SoundQueue.tres" type="Resource" id=4]
+[ext_resource path="res://Moonvalk/Components/Audio/SoundPool/node_SoundPool.tres" type="Resource" id=5]
+
+[resource]
+script = ExtResource( 3 )
+Nodes = [ ExtResource( 1 ), ExtResource( 2 ), ExtResource( 5 ), ExtResource( 4 ) ]

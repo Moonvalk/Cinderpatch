@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Addons/CustomNodes/Data/CustomNodeResource.cs" type="Script" id=1]
+[ext_resource path="res://Addons/CustomNodes/Icons/spr_icon_scene_loader.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+Name = "MoonSceneLoader"
+InheritedNode = "Node"
+ScriptLocation = "res://Addons/CustomNodes/Nodes/SceneLoader.cs"
+Icon = ExtResource( 2 )
