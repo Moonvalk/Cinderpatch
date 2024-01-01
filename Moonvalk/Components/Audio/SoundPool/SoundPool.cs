@@ -60,8 +60,7 @@ namespace Moonvalk.Audio
             } while (index == _previousIndex);
 
             _previousIndex = index;
-            _sounds[index]
-                .PlaySound();
+            _sounds[index].PlaySound();
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Moonvalk.Resources
         /// <summary>
         /// Called to refresh registered classes on user request.
         /// </summary>
-        public void RefreshCustomClasses()
+        private void RefreshCustomClasses()
         {
             GD.Print("\nRefreshing Registered Resources...");
             UnregisterCustomClasses();
@@ -26,7 +26,7 @@ namespace Moonvalk.Resources
         /// <summary>
         /// Called to register all custom types.
         /// </summary>
-        protected void RegisterCustomClasses()
+        private void RegisterCustomClasses()
         {
             _customTypes.Clear();
 
@@ -50,7 +50,7 @@ namespace Moonvalk.Resources
         /// <param name="type_">The type being added.</param>
         /// <param name="defaultBaseTypeName_">The default inherited type in the case none is provided.</param>
         /// <param name="file_">The file being written.</param>
-        protected void AddRegisteredType(Type type_, string defaultBaseTypeName_, File file_)
+        private void AddRegisteredType(Type type_, string defaultBaseTypeName_, File file_)
         {
             var attribute = (RegisteredTypeAttribute)Attribute.GetCustomAttribute(type_, typeof(RegisteredTypeAttribute));
             var path = FindClassPath(type_);
@@ -119,7 +119,7 @@ namespace Moonvalk.Resources
         /// </summary>
         /// <param name="type_">The type to find.</param>
         /// <returns>Returns a string matching the path of the requested type.</returns>
-        protected static string FindClassPath(Type type_)
+        private static string FindClassPath(Type type_)
         {
             switch (ResourceRegistrySettings.SearchType)
             {
@@ -138,7 +138,7 @@ namespace Moonvalk.Resources
         /// </summary>
         /// <param name="type_">The type to find a path for.</param>
         /// <returns>Returns the matching path for the type.</returns>
-        protected static string FindClassPathNamespace(Type type_)
+        private static string FindClassPathNamespace(Type type_)
         {
             foreach (var dir in ResourceRegistrySettings.ResourceScriptDirectories)
             {
@@ -158,7 +158,7 @@ namespace Moonvalk.Resources
         /// </summary>
         /// <param name="type_">The type to find a path for.</param>
         /// <returns>Returns the matching path for the type.</returns>
-        protected static string FindClassPathRecursive(Type type_)
+        private static string FindClassPathRecursive(Type type_)
         {
             foreach (var directory in ResourceRegistrySettings.ResourceScriptDirectories)
             {
@@ -178,41 +178,46 @@ namespace Moonvalk.Resources
         /// <param name="type_">The type to find a path for.</param>
         /// <param name="directory_">The directory to search.</param>
         /// <returns>Returns the matching path, when found.</returns>
-        protected static string FindClassPathRecursiveHelper(Type type_, string directory_)
+        private static string FindClassPathRecursiveHelper(Type type_, string directory_)
         {
             var dir = new Directory();
 
-            if (dir.Open(directory_) == Error.Ok)
+            if (dir.Open(directory_) != Error.Ok)
             {
-                dir.ListDirBegin();
-                while (true)
+                return null;
+            }
+
+            dir.ListDirBegin();
+            while (true)
+            {
+                var fileOrDirName = dir.GetNext();
+
+                // Skips hidden files like .
+                if (fileOrDirName == "")
                 {
-                    var fileOrDirName = dir.GetNext();
+                    break;
+                }
 
-                    // Skips hidden files like .
-                    if (fileOrDirName == "")
-                    {
-                        break;
-                    }
+                if (fileOrDirName.BeginsWith("."))
+                {
+                    continue;
+                }
 
-                    if (fileOrDirName.BeginsWith("."))
+                if (dir.CurrentIsDir())
+                {
+                    var foundFilePath = FindClassPathRecursiveHelper(type_, dir.GetCurrentDir() + "/" + fileOrDirName);
+                    if (foundFilePath == null)
                     {
                         continue;
                     }
 
-                    if (dir.CurrentIsDir())
-                    {
-                        var foundFilePath = FindClassPathRecursiveHelper(type_, dir.GetCurrentDir() + "/" + fileOrDirName);
-                        if (foundFilePath != null)
-                        {
-                            dir.ListDirEnd();
-                            return foundFilePath;
-                        }
-                    }
-                    else if (fileOrDirName == $"{type_.Name}.cs")
-                    {
-                        return dir.GetCurrentDir() + "/" + fileOrDirName;
-                    }
+                    dir.ListDirEnd();
+                    return foundFilePath;
+                }
+                
+                if (fileOrDirName == $"{type_.Name}.cs")
+                {
+                    return dir.GetCurrentDir() + "/" + fileOrDirName;
                 }
             }
 
@@ -223,7 +228,7 @@ namespace Moonvalk.Resources
         /// Gets all valid custom registered types.
         /// </summary>
         /// <returns>All valid custom registered types.</returns>
-        protected static IEnumerable<Type> GetCustomRegisteredTypes()
+        private static IEnumerable<Type> GetCustomRegisteredTypes()
         {
             var assembly = Assembly.GetAssembly(typeof(ResourceRegistryPlugin));
             return assembly.GetTypes()
@@ -236,7 +241,7 @@ namespace Moonvalk.Resources
         /// <summary>
         /// Called to unregister all custom Resource types from the Godot registry.
         /// </summary>
-        protected void UnregisterCustomClasses()
+        private void UnregisterCustomClasses()
         {
             foreach (var script in _customTypes)
             {
@@ -265,6 +270,11 @@ namespace Moonvalk.Resources
         /// Stores reference to the refresh button within the Godot editor to load registered types.
         /// </summary>
         private Button _refreshButton;
+        
+        /// <summary>
+        /// Text displayed on the refresh resources button.
+        /// </summary>
+        private const string RefreshButtonText = "Build Resources";
         #endregion
 
         #region Godot Events
@@ -273,9 +283,14 @@ namespace Moonvalk.Resources
         /// </summary>
         public override void _EnterTree()
         {
+            if (!Engine.EditorHint)
+            {
+                return;
+            }
+            
             // Initialize a new refresh button and slot it in the toolbar container.
             _refreshButton = new Button();
-            _refreshButton.Text = "Build Resources";
+            _refreshButton.Text = RefreshButtonText;
 
             AddControlToContainer(CustomControlContainer.Toolbar, _refreshButton);
             _refreshButton.Icon = _refreshButton.GetIcon("Reload", "EditorIcons");
@@ -292,6 +307,11 @@ namespace Moonvalk.Resources
         /// </summary>
         public override void _ExitTree()
         {
+            if (!Engine.EditorHint)
+            {
+                return;
+            }
+            
             UnregisterCustomClasses();
             RemoveControlFromContainer(CustomControlContainer.Toolbar, _refreshButton);
             _refreshButton.QueueFree();

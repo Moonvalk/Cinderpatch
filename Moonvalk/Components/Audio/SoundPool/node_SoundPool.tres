@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Addons/CustomNodes/Data/CustomNodeResource.cs" type="Script" id=1]
+[ext_resource path="res://Moonvalk/Components/Audio/SoundPool/spr_icon_sound_pool.png" type="Texture" id=2]
+
+[resource]
+script = ExtResource( 1 )
+Name = "MoonSoundPool"
+InheritedNode = "Node"
+ScriptLocation = "res://Moonvalk/Components/Audio/SoundPool/SoundPool.cs"
+Icon = ExtResource( 2 )

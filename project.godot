@@ -8,10 +8,25 @@
 
 config_version=4
 
+[ResourceRegistryPlugin]
+
+ClassPrefix=""
+SearchType=0
+ResourceScriptDirectories=[ "res://" ]
+
 [application]
 
 config/name="Cinderpatch"
+run/main_scene="res://Game/GameRoot.tscn"
 config/icon="res://icon.png"
+
+[autoload]
+
+GdTaskPlayerLoopAutoload="*res://Addons/GDTask/Autoload/GDTaskPlayerLoopAutoload.cs"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/CSharpRegistry/plugin.cfg", "res://addons/CustomNodes/plugin.cfg" )
 
 [gui]
 

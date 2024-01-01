@@ -1,6 +1,8 @@
 // #define __DEBUG
 
 using System;
+using System.Threading.Tasks;
+using Fractural.Tasks;
 using Godot;
 using Moonvalk.Accessory;
 using Moonvalk.Utilities;
@@ -36,25 +38,40 @@ namespace Moonvalk.Resources
             float? initialPollDelay_ = null
         ) where ResourceType : Resource
         {
-            Action load = () =>
+            void LoadResource()
             {
                 var loader = ResourceLoader.LoadInteractive(path_);
 #if (__DEBUG)
 					GD.Print("Started loading resource at path: " + path_);
 #endif
-
                 PollLoader(loader, onLoad_, pollRate_ ?? DefaultPollRate, initialPollDelay_ ?? 0f);
-            };
+            }
+
             if (DeviceHelpers.IsDeviceHtml5())
             {
-                load();
+                LoadResource();
                 return;
             }
 
-            var thread = new Thread(() => { load(); });
+            var thread = new Thread(LoadResource);
             thread.Start();
         }
 
+        /// <summary>
+        /// Loads a resource at the specified path asynchronously if available.
+        /// </summary>
+        /// <param name="path_">The path within the file system where this resource is located.</param>
+        /// <param name="onLoad_">A callback to be executed once a successful load is complete.</param>
+        /// <typeparam name="ResourceType">The type of resource to be loaded.</typeparam>
+        /// <returns>Returns the resource when loaded successfully.</returns>
+        public static async GDTask<ResourceType> LoadAsync<ResourceType>(string path_, Action<ResourceType> onLoad_ = null)
+            where ResourceType : Resource
+        {
+            var resource = await GDTask.RunOnThreadPool(() => ResourceLoader.Load<ResourceType>(path_));
+            onLoad_?.Invoke(resource);
+            return resource;
+        }
+        
         /// <summary>
         /// Called to poll an active resource loader after a duration of time has passed. This will recursively
         /// call itself until a successful load is complete.

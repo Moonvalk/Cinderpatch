@@ -1,0 +1,8 @@
+[gd_resource type="Resource" load_steps=3 format=2]
+
+[ext_resource path="res://Addons/CustomNodes/Data/CustomNodesContainer.cs" type="Script" id=1]
+[ext_resource path="res://Addons/CustomNodes/MoonNodes.tres" type="Resource" id=2]
+
+[resource]
+script = ExtResource( 1 )
+Lists = [ ExtResource( 2 ) ]
